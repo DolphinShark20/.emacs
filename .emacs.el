@@ -40,10 +40,6 @@
 (use-package lsp-mode
   :ensure t)
 
-;;; TODO: configure lsp-ui properly
-(use-package lsp-ui
-  :ensure t)
-
 (use-package yasnippet
   :ensure t
   :config
@@ -56,9 +52,6 @@
 (use-package forge
   :ensure t)
 
-(use-package async
-  :ensure t)
-
 ;;; DM setup
 (wget-fetch "raw.githubusercontent.com/Djiq/opendream-mode/refs/heads/master/opendream-mode.el")
 (load-file (concat user-emacs-directory "opendream-mode.el"))
@@ -68,14 +61,6 @@
   :new-connection (lsp-stdio-connection '("~/.emacs.d/dm-langserver"))
   :major-modes '(opendream-mode)
   :server-id 'dreammaker-server))
-
-(defun cm-build-and-run ()
-  "Build and run CM."
-  (interactive)
-  (if (string-equal default-directory "cmss13")
-      
-      )
-  )
 
 (use-package kaolin-themes
   :ensure t
