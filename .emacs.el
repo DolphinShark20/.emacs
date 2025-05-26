@@ -1,7 +1,66 @@
-;;; File to be loaded when I want to program
-;;; Contrary to the name, should not be loaded as 'init.el'
+;;; Basics
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+
+(use-package ef-themes
+  :ensure t
+  :config
+  (load-theme 'ef-bio t))
+
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(menu-bar-mode -1)
 (setq cursor-blink-mode 0)
-;;; CUSTOM SETUP
+(hl-line-mode)
+
+(use-package company
+  :ensure t
+  :hook (prog-mode . company-mode))
+
+(use-package vertico
+  :ensure t
+  :init
+  (setq completion-ignore-case t)
+  (add-to-list 'completion-styles 'substring)
+  :config
+  (vertico-mode))
+
+(use-package marginalia
+  :ensure t
+  :config
+  (marginalia-mode))
+
+;;; Org setup
+(require 'org)
+(setq org-ellipsis "⤵") ;;; Remove this when running in terminal mode
+(add-hook 'org-mode-hook 'org-indent-mode)
+(use-package org-modern
+  :ensure t
+  :config
+  (setopt org-modern-fold-stars
+	  '(
+	    ("▶" . "▼")
+	    ("▷" . "▽")
+	    ("◉" . "○")
+	    ("▹" . "▿")
+	    ("▸" . "▾")
+	    ))
+  (global-org-modern-mode))
+
+(use-package xenops
+  :ensure t
+  :hook (org-mode . xenops-mode)
+  :config
+  (setq xenops-math-image-scale-factor 1.75)
+  :bind (:map xenops-mode-map
+	      ("C-c m r" . xenops-render)
+	      ("C-c m u" . xenops-reveal)))
+
+;;; Custom Config-Related Setup
 (defvar wget-fetch-filename nil
   "For communicating between the function 'wget-fetch' and its sentinel.")
 (defun wget-fetch (link)
@@ -32,12 +91,12 @@
     )
   )
 
-;;; PACKAGE SETUP
-(use-package company
-  :ensure t
-  :hook (prog-mode . company-mode))
-
+;;; General Programming-oriented Setup
 (use-package lsp-mode
+  :ensure t)
+(use-package consult
+  :ensure t)
+(use-package affe
   :ensure t)
 
 (use-package yasnippet
@@ -62,17 +121,7 @@
   :major-modes '(opendream-mode)
   :server-id 'dreammaker-server))
 
-(use-package kaolin-themes
-  :ensure t
-  :config
-  (load-theme 'kaolin-temple t))
-
-(global-hl-line-mode 1)
-(custom-set-faces
- '(hl-line ((t (:background "#5c5c5c")))))
-
 ;;; C setup
-;;; User-functions
 (defvar compile-and-run-pass-bucket nil
   "Intermezzo var to pass directory that 'compile-c-file' is running in to 'compile-and-run-hook'.")
 (defun compile-c-file ()
@@ -120,12 +169,31 @@
     )
   )
 (add-hook 'compilation-finish-functions 'compile-and-run-hook)
-
-;;; Keybind setup
 (add-hook 'c-mode-hook
 	  (lambda ()
 	    (local-set-key (kbd "C-c -") 'compile-c-file)))
 (add-hook 'c-ts-mode-hook
 	  (lambda ()
 	    (local-set-key (kbd "C-c -") 'compile-c-file)))
+
+;;; General Keybind Setup
+
 (global-set-key (kbd "C-c b") 'eval-buffer)
+
+;;; Fun
+;;; Tetris tweaks, (WASD tweaks)
+(define-key tetris-mode-map (kbd "w") 'tetris-rotate-prev)
+(define-key tetris-mode-map (kbd "a") 'tetris-move-left)
+(define-key tetris-mode-map (kbd "d") 'tetris-move-right)
+(define-key tetris-mode-map (kbd "s") 'tetris-move-down)
+(define-key tetris-mode-map (kbd "e") 'tetris-move-bottom)
+;;; Feed setup
+(use-package elfeed
+  :ensure t
+  :config
+  (add-to-list 'elfeed-feeds "https://planet.emacslife.com/atom.xml")
+  (add-to-list 'elfeed-feeds "https://xkcd.com/rss.xml")
+  )
+
+;;; The config ends here
+(provide 'init)
