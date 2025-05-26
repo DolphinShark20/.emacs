@@ -17,6 +17,13 @@
 (setq cursor-blink-mode 0)
 (hl-line-mode)
 
+(use-package moody
+  :ensure t
+  :config
+  (moody-replace-mode-line-front-space)
+  (moody-replace-mode-line-buffer-identification)
+  (moody-replace-vc-mode))
+
 (use-package company
   :ensure t
   :hook (prog-mode . company-mode))
@@ -179,9 +186,15 @@
 ;;; General Keybind Setup
 
 (global-set-key (kbd "C-c b") 'eval-buffer)
+(global-set-key (kbd "C-c m i")
+		(lambda ()
+		  (interactive)
+		  (find-file user-init-file) ;;; TODO Add handling for byte-compiled case
+		  ))
 
 ;;; Fun
 ;;; Tetris tweaks, (WASD tweaks)
+(require 'tetris)
 (define-key tetris-mode-map (kbd "w") 'tetris-rotate-prev)
 (define-key tetris-mode-map (kbd "a") 'tetris-move-left)
 (define-key tetris-mode-map (kbd "d") 'tetris-move-right)
