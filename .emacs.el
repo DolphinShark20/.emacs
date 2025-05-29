@@ -14,7 +14,7 @@
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (menu-bar-mode -1)
-(setq cursor-blink-mode 0)
+(cursor-blink-mode -1)
 (hl-line-mode)
 
 (use-package moody
@@ -44,6 +44,7 @@
 ;;; Org setup
 (require 'org)
 (setq org-ellipsis "⤵") ;;; Remove this when running in terminal mode
+(define-key org-mode-map (kbd "<tab>") 'org-cycle-internal-local) ;;; NOTE: Doesn't cycle headers on first insertion anymore
 (add-hook 'org-mode-hook 'org-indent-mode)
 (use-package org-modern
   :ensure t
@@ -104,7 +105,14 @@
 (use-package consult
   :ensure t)
 (use-package affe
-  :ensure t)
+  :ensure t
+  :config
+  (setq affe-count 60))
+(use-package treemacs
+  :ensure t
+  :config
+  (require 'dired)
+  (define-key dired-mode-map (kbd "C-c t") 'treemacs))
 
 (use-package yasnippet
   :ensure t
@@ -115,8 +123,8 @@
 
 (use-package magit
   :ensure t)
-(use-package forge
-  :ensure t)
+(use-package forge ;;; Not compatible with pre-Emacs-29 releases
+  :ensure t) 
 
 ;;; DM setup
 (wget-fetch "raw.githubusercontent.com/Djiq/opendream-mode/refs/heads/master/opendream-mode.el")
