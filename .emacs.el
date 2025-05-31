@@ -3,9 +3,11 @@
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 
+;;; Backwards compatibility
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
-
+(require 'use-package)
+			     
 (use-package ef-themes
   :ensure t
   :config
@@ -14,7 +16,7 @@
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (menu-bar-mode -1)
-(cursor-blink-mode -1)
+(blink-cursor-mode -1)
 (hl-line-mode)
 
 (use-package moody
@@ -44,7 +46,12 @@
 ;;; Org setup
 (require 'org)
 (setq org-ellipsis "⤵") ;;; Remove this when running in terminal mode
-(define-key org-mode-map (kbd "<tab>") 'org-cycle-internal-local) ;;; NOTE: Doesn't cycle headers on first insertion anymore
+(define-key org-mode-map (kbd "<tab>")
+	    (lambda ()
+	      (interactive)
+	      (org-cycle-internal-local))) ;;; TODO Just modify 'org-cycle' to use 'org-cycle-internal-local' instead of doing this; this is dumb
+(define-key org-mode-map (kbd "C-<tab>") 'org-cycle) ;;; Bandaid for above
+
 (add-hook 'org-mode-hook 'org-indent-mode)
 (use-package org-modern
   :ensure t
@@ -58,6 +65,11 @@
 	    ("▸" . "▾")
 	    ))
   (global-org-modern-mode))
+(unless (package-installed-p 'org-modern-indent)
+  (package-vc-install "https://github.com/jdtsmith/org-modern-indent"))
+(use-package org-modern-indent
+  :config
+  (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
 
 (use-package xenops
   :ensure t
@@ -80,7 +92,7 @@
             )
         (message (concat wget-fetch-filename " is already downloaded, so not downloading!"))
         )
-    (let* (
+    (let (
            (prev-dir default-directory)
            )
       (setq default-directory user-emacs-directory)
@@ -123,8 +135,14 @@
 
 (use-package magit
   :ensure t)
-(use-package forge ;;; Not compatible with pre-Emacs-29 releases
-  :ensure t) 
+(use-package forge ;;; Not compatible with pre-Emacs=29 releases
+  :ensure t)
+
+;;; Haphazard, be careful with older Emacs installs (pre 29.4)
+(unless (package-installed-p 'disproject)
+  (package-vc-install "https://github.com/aurtzy/disproject"))
+(require 'disproject)
+(define-key ctl-x-map (kbd "p") 'disproject-dispatch) ;;; Overrides default binds, careful
 
 ;;; DM setup
 (wget-fetch "raw.githubusercontent.com/Djiq/opendream-mode/refs/heads/master/opendream-mode.el")
@@ -135,6 +153,8 @@
   :new-connection (lsp-stdio-connection '("~/.emacs.d/dm-langserver"))
   :major-modes '(opendream-mode)
   :server-id 'dreammaker-server))
+(add-hook 'opendream-mode-hook #'lsp-mode) ;;; If opendream-mode was loaded /before/ lsp-mode, this wouldn't be necessary, but I like things tidy!
+(add-to-list 'lsp-language-id-configuration '("opendream-mode" . "dreammaker"))
 
 ;;; C setup
 (defvar compile-and-run-pass-bucket nil
@@ -215,6 +235,9 @@
   (add-to-list 'elfeed-feeds "https://planet.emacslife.com/atom.xml")
   (add-to-list 'elfeed-feeds "https://xkcd.com/rss.xml")
   )
+;;; Chess setup
+(use-package chess
+  :ensure t)
 
 ;;; The config ends here
 (provide 'init)
