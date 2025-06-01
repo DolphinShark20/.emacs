@@ -147,13 +147,23 @@
 ;;; DM setup
 (wget-fetch "raw.githubusercontent.com/Djiq/opendream-mode/refs/heads/master/opendream-mode.el")
 (load-file (concat user-emacs-directory "opendream-mode.el"))
-(wget-fetch "https://github.com/SpaceManiac/SpacemanDMM/releases/download/suite-1.10/dm-langserver")
-(lsp-register-client
- (make-lsp-client
-  :new-connection (lsp-stdio-connection '("~/.emacs.d/dm-langserver"))
-  :major-modes '(opendream-mode)
-  :server-id 'dreammaker-server))
-(add-hook 'opendream-mode-hook #'lsp-mode) ;;; If opendream-mode was loaded /before/ lsp-mode, this wouldn't be necessary, but I like things tidy!
+(let (
+      (gh-link "https://github.com/SpaceManiac/SpacemanDMM/releases/download/suite-1.10/dm-langserver")
+      (dest "~/.emacs.d/dm-langserver")
+      )
+  (if (eq system-type 'windows-nt)
+      (progn
+	(wget-fetch (concat gh-link ".exe"))
+	(setq dest (concat dest ".exe"))
+	)
+    (wget-fetch gh-link))
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection dest)
+    :major-modes '(opendream-mode)
+    :server-id 'dreammaker-server))
+  )  
+(add-hook 'opendream-mode-hook #'lsp-mode) ;;; If opendream-mode was loaded /before/ lsp-mode, this wouldn't be necessary, but I like everything in one place!
 (add-to-list 'lsp-language-id-configuration '("opendream-mode" . "dreammaker"))
 
 ;;; C setup
